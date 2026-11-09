@@ -107,6 +107,10 @@ class AnalyzeResumeJob implements ShouldQueue
                 targetRole: $analysis->target_role,
                 model: $analysis->ai_model
             );
+            $aiResult['score_evidence'] = $this->verifiedScoreEvidence(
+                $aiResult['score_evidence'] ?? [],
+                $resumeText
+            );
 
             // Step 5: Calculate combined scores
             $categoryScores = $aiResult['category_scores'] ?? null;
@@ -213,6 +217,61 @@ class AnalyzeResumeJob implements ShouldQueue
             ]);
             $this->cleanupFile($analysis);
         }
+    }
+
+    /**
+     * Keep only AI-provided score quotes that can be verified in the resume text.
+     *
+     * @param mixed $scoreEvidence
+     * @return array<string, array{reasoning: string, quotes: list<string>}>
+     */
+    private function verifiedScoreEvidence(mixed $scoreEvidence, string $resumeText): array
+    {
+        $verifiedEvidence = [];
+        $normalizedResume = $this->normalizeEvidenceText($resumeText);
+
+        foreach (['impact', 'clarity', 'relevance'] as $category) {
+            $categoryEvidence = is_array($scoreEvidence) && is_array($scoreEvidence[$category] ?? null)
+                ? $scoreEvidence[$category]
+                : [];
+            $quotes = [];
+
+            foreach (is_array($categoryEvidence['quotes'] ?? null) ? $categoryEvidence['quotes'] : [] as $quote) {
+                if (!is_string($quote)) {
+                    continue;
+                }
+
+                $quote = trim($quote);
+                $normalizedQuote = $this->normalizeEvidenceText($quote);
+
+                if (mb_strlen($normalizedQuote) < 8 || !str_contains($normalizedResume, $normalizedQuote)) {
+                    continue;
+                }
+
+                $quotes[] = $quote;
+
+                if (count($quotes) === 2) {
+                    break;
+                }
+            }
+
+            if ($quotes !== []) {
+                $reasoning = $categoryEvidence['reasoning'] ?? '';
+                $verifiedEvidence[$category] = [
+                    'reasoning' => is_string($reasoning) ? mb_substr(trim($reasoning), 0, 500) : '',
+                    'quotes' => array_values(array_unique($quotes)),
+                ];
+            }
+        }
+
+        return $verifiedEvidence;
+    }
+
+    private function normalizeEvidenceText(string $text): string
+    {
+        $normalized = preg_replace('/\s+/u', ' ', trim($text)) ?? '';
+
+        return mb_strtolower($normalized);
     }
 
     /**

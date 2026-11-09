@@ -105,6 +105,15 @@ EOT;
                                         'clarity' => 85,
                                         'relevance' => 90,
                                     ],
+                                    'score_evidence' => [
+                                        'impact' => [
+                                            'reasoning' => 'The resume gives a measurable latency improvement.',
+                                            'quotes' => [
+                                                'Reduced 95th-percentile API response latency from 680ms to 110ms across 15 endpoints.',
+                                                'Invented result: increased revenue by 200%.',
+                                            ],
+                                        ],
+                                    ],
                                     'strengths' => [
                                         ['title' => 'Strong Metrics', 'description' => 'Quantifies financial and performance outcomes.'],
                                     ],
@@ -147,6 +156,9 @@ EOT;
     expect($analysis->relevance_score)->toBe(90);
     expect(count($analysis->rule_results['checks']))->toBeGreaterThan(10);
     expect(count($analysis->bullet_point_rewrites))->toBe(1);
+    expect($analysis->result_json['score_evidence']['impact']['quotes'])->toBe([
+        'Reduced 95th-percentile API response latency from 680ms to 110ms across 15 endpoints.',
+    ]);
 
     // Private file should be deleted upon completion
     expect($analysis->file_path)->toBeNull();
@@ -271,6 +283,12 @@ it('renders the completed resume report with readability checks and suggested re
         'result_json' => [
             'summary_verdict' => 'Outstanding candidate profile for Machine Learning.',
             'category_scores' => ['impact' => 85, 'clarity' => 88, 'relevance' => 90],
+            'score_evidence' => [
+                'impact' => [
+                    'reasoning' => 'The resume quantifies the result.',
+                    'quotes' => ['Served ML models.'],
+                ],
+            ],
             'strengths' => [
                 ['title' => 'Clear Metrics', 'description' => 'Great numbers.'],
             ],
@@ -298,6 +316,11 @@ it('renders the completed resume report with readability checks and suggested re
     $response->assertSee('Impact');
     $response->assertSee('Clarity');
     $response->assertSee('Relevance');
+    $response->assertSee('How the overall score is calculated');
+    $response->assertSee('50% readability checks + 50% average AI content quality');
+    $response->assertSee('Resume evidence');
+    $response->assertSee('The resume quantifies the result.');
+    $response->assertSee('Served ML models.');
     $response->assertSee('ATS Readability');
     $response->assertSee('Pass / Fail Checklist');
     $response->assertSee('Bullet Point Rewrites');

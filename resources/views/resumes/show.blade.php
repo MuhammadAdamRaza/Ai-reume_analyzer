@@ -136,6 +136,7 @@
             $priorityIssues = $analysis->priority_issues;
             $rewrites = $analysis->bullet_point_rewrites;
             $missingKeywords = $analysis->missing_keywords;
+            $scoreEvidence = $analysis->result_json['score_evidence'] ?? [];
             $hasJobDesc = !empty(trim((string) $analysis->job_description));
             $isRedistributed = $ruleResults['redistributed'] ?? false;
         @endphp
@@ -226,6 +227,15 @@
                         <p class="text-xs sm:text-sm font-semibold leading-relaxed">
                             "Your resume scored <span class="font-bold text-indigo-700">{{ $analysis->ats_score }} out of 100</span> on this app's text and format checks. This is an estimate, not a test of any specific employer's system or a prediction of hiring outcomes."
                         </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-700">How the overall score is calculated</p>
+                        @if($hasJobDesc && $analysis->job_match_score !== null)
+                            <p class="mt-1 text-xs leading-relaxed text-slate-600">30% readability checks + 40% average AI content quality (Impact, Clarity, Relevance) + 30% AI-estimated job-description match.</p>
+                        @else
+                            <p class="mt-1 text-xs leading-relaxed text-slate-600">50% readability checks + 50% average AI content quality (Impact, Clarity, Relevance). Add a job description to include a job-match estimate.</p>
+                        @endif
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -321,6 +331,17 @@
                     <p class="text-[11px] text-slate-500 leading-relaxed">
                         AI-generated estimate based on achievement descriptions, metrics, and action-oriented wording.
                     </p>
+                    @if(!empty($scoreEvidence['impact']['quotes']))
+                        <div class="mt-3 border-t border-slate-100 pt-3">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resume evidence</p>
+                            @if(!empty($scoreEvidence['impact']['reasoning']))
+                                <p class="mt-1 text-[11px] leading-relaxed text-slate-600">{{ $scoreEvidence['impact']['reasoning'] }}</p>
+                            @endif
+                            @foreach($scoreEvidence['impact']['quotes'] as $quote)
+                                <blockquote class="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-700">“{{ $quote }}”</blockquote>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Clarity -->
@@ -340,6 +361,17 @@
                     <p class="text-[11px] text-slate-500 leading-relaxed">
                         AI-generated estimate based on text clarity, bullet length, and wording.
                     </p>
+                    @if(!empty($scoreEvidence['clarity']['quotes']))
+                        <div class="mt-3 border-t border-slate-100 pt-3">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resume evidence</p>
+                            @if(!empty($scoreEvidence['clarity']['reasoning']))
+                                <p class="mt-1 text-[11px] leading-relaxed text-slate-600">{{ $scoreEvidence['clarity']['reasoning'] }}</p>
+                            @endif
+                            @foreach($scoreEvidence['clarity']['quotes'] as $quote)
+                                <blockquote class="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-700">“{{ $quote }}”</blockquote>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Relevance -->
@@ -359,6 +391,17 @@
                     <p class="text-[11px] text-slate-500 leading-relaxed">
                         AI-generated estimate based on resume content and any target role or job description provided.
                     </p>
+                    @if(!empty($scoreEvidence['relevance']['quotes']))
+                        <div class="mt-3 border-t border-slate-100 pt-3">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resume evidence</p>
+                            @if(!empty($scoreEvidence['relevance']['reasoning']))
+                                <p class="mt-1 text-[11px] leading-relaxed text-slate-600">{{ $scoreEvidence['relevance']['reasoning'] }}</p>
+                            @endif
+                            @foreach($scoreEvidence['relevance']['quotes'] as $quote)
+                                <blockquote class="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-700">“{{ $quote }}”</blockquote>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

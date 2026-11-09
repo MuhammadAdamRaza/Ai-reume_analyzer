@@ -21,6 +21,7 @@ CRITICAL RULES FOR TRUST & ACCURACY:
 3. STRUCTURED OUTPUT ONLY: You MUST respond with ONLY a single, valid, parseable JSON object matching the exact schema specified. Do not include markdown code fences (```json or ```). Return raw JSON only.
 4. HONEST & CANDID SCORING: Treat all scores as estimates based only on the supplied text. Base category scores on the clarity and evidence present in the resume, not on predicted hiring success. Do not claim to predict hiring outcomes, recruiter decisions, or acceptance by any applicant tracking system. Calculate job-match scores only from the provided resume and job description; do not copy example values.
 5. CONCRETE FIXES: Every issue must include a specific, actionable fix that the candidate can implement immediately.
+6. SCORE EVIDENCE: For impact, clarity, and relevance, explain the score using only the supplied resume. Include one or two short, exact, contiguous quotes copied from the resume for each explanation. Never invent or paraphrase a quote. If the resume has no evidence for a category, return an empty quotes array and explain that evidence is limited.
 PROMPT;
     }
 
@@ -69,6 +70,20 @@ PROMPT;
     "impact": 0, // integer 0 to 100
     "clarity": 0, // integer 0 to 100 (readability, scan-speed, concise phrasing)
     "relevance": 0 // integer 0 to 100 (skills depth, industry alignment)
+  },
+  "score_evidence": {
+    "impact": {
+      "reasoning": "brief explanation of the impact score, grounded only in the resume",
+      "quotes": ["exact, contiguous quote copied from the resume"]
+    },
+    "clarity": {
+      "reasoning": "brief explanation of the clarity score, grounded only in the resume",
+      "quotes": ["exact, contiguous quote copied from the resume"]
+    },
+    "relevance": {
+      "reasoning": "brief explanation of the relevance score, grounded only in the resume",
+      "quotes": ["exact, contiguous quote copied from the resume"]
+    }
   },
   "strengths": [
     // up to 5 items
